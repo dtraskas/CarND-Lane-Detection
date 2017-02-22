@@ -5,11 +5,9 @@
 # Dimitrios Traskas
 #
 #
-
 import numpy as np
 import cv2
 import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
 import os
 
 class CameraCalibrator:
@@ -41,10 +39,10 @@ class CameraCalibrator:
         filenames = self.read_filenames()
         images = []
         for fname in filenames:
-            image = mpimg.imread(fname)
+            image = mpimg.imread(fname)            
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            ret, new_corners = cv2.findChessboardCorners(gray, self.corners, None)
-            print(fname, ret)    
+
+            ret, new_corners = cv2.findChessboardCorners(gray, self.corners, None)            
             if ret == True:
                 imgpoints.append(new_corners)    
                 objpoints.append(objp)
@@ -53,8 +51,7 @@ class CameraCalibrator:
                 images.append(img)
 
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+        
         print("Saving camera calibration coefficients...")
-        np.savetxt("data/mtx.dat", mtx)
-        np.savetxt("data/dist.dat", dist)
-
-        return mtx, dist, images
+        np.savetxt("model/mtx.dat", mtx)
+        np.savetxt("model/dist.dat", dist)        
