@@ -16,6 +16,7 @@ class CameraCalibrator:
         self.path = path
         self.corners = corners
     
+    # Read all the image filenames and return back a list of those
     def read_filenames(self):  
         filecount = len([f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f))])      
         images = np.empty(filecount, dtype='object')     
@@ -28,6 +29,7 @@ class CameraCalibrator:
         
         return images
     
+    # Perform the calibration step and save the calibration matrix and distortion coefficients
     def calibrate(self):        
         
         objpoints = []
@@ -56,7 +58,9 @@ class CameraCalibrator:
         np.savetxt("model/mtx.dat", mtx)
         np.savetxt("model/dist.dat", dist)        
         return mtx, dist
-
+    
+    # Calculates the perspective transform matrices using a set of source points
+    # as well as the calibration matrix and distortion coefficients calculated earlier
     def calc_perspective(self, image, mtx, dist, offset, src_points):
         
         undist = cv2.undistort(image, mtx, dist, None, mtx)

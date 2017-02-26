@@ -75,7 +75,7 @@ def process_video(inp_fname, out_fname):
 
 if __name__ == '__main__':
     
-    phase = 'transform'
+    phase = 'undistort'
     
     if phase == 'calibration':
         corners = (9, 6)
@@ -97,6 +97,35 @@ if __name__ == '__main__':
         plt.imshow(cal_image, cmap='gray')
         plt.show()
     
+    if phase == 'undistort':
+        mtx = np.loadtxt("model/mtx.dat")
+        dist = np.loadtxt("model/dist.dat")
+        M = np.loadtxt("model/matrix.dat")
+        Minv = np.loadtxt("model/matrix_inv.dat")
+
+        transformer = Transformer()
+        transformer.initialise(mtx, dist, M, Minv)
+        
+
+        fig = plt.figure(2, figsize=(9,3))
+        fig.clf()
+        ax1 = fig.add_subplot(121)
+        ax1.set_title('Distorted')
+        ax2 = fig.add_subplot(122)
+        ax2.set_title('Undistorted')
+        plt.setp(ax2.get_yticklabels(), visible=0)
+
+        example_img = mpimg.imread('camera_cal/calibration1.jpg')
+        undst_example_img = transformer.undistort(example_img)
+        ax1.imshow(example_img, cmap='gray')
+        ax2.imshow(undst_example_img, cmap='gray')
+        ax2.set_xlabel("$x$")
+        ax1.set_xlabel("$x$")
+        ax1.set_ylabel("$y$")
+        plt.tight_layout()
+        plt.show()
+        fig.savefig("output_images/undistorted_output.png")
+
     if phase == 'transform':
         image = mpimg.imread('test_images/test2.jpg')
 
