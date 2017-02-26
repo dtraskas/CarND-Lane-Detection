@@ -88,7 +88,7 @@ The function described can be found in `lanefinder.py` and `sliding_window()`.
 
 In the `lanefinder.py` function and the `get_curvature()` function I calculate the curvature using the formula:
 
-R_curve = (1 + (2Ay+B)<sup>2</sup>)<sup>3/2</sup> / |2A|
+`R_curve = (1 + (2Ay+B)<sup>2</sup>)<sup>3/2</sup> / |2A|`
 
 ####6. Final Result
 
