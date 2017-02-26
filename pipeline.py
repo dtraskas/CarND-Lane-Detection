@@ -17,6 +17,8 @@ from calibrator import CameraCalibrator
 from transformer import Transformer 
 from lanefinder import LaneFinder
 
+# Definition of global transformer used in the process image 
+# function because a function parameter cannot be passed
 globalTransformer = Transformer()
 def process_image(image):
     
@@ -46,6 +48,7 @@ def process_image(image):
 
     return result    
 
+# Process the entire video
 def process_video(inp_fname, out_fname):    
     
     mtx = np.loadtxt("model/mtx.dat")
@@ -123,17 +126,7 @@ if __name__ == '__main__':
         plt.imshow(result)
         plt.show()
 
-        '''
-        plt.figure()
-        plt.imshow(out_img)
-        plt.plot(left_fitx, ploty, color='yellow')
-        plt.plot(right_fitx, ploty, color='yellow')
-        plt.xlim(0, 1280)
-        plt.ylim(720, 0)
-        plt.show()
-        '''
-
     if phase == 'process':
         print("Started processing video...")
-        process_video('challenge_video.mp4', 'outvideo.mp4')
+        process_video('project_video.mp4', 'project_output.mp4')
         print("Completed video processing!")

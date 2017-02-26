@@ -101,3 +101,9 @@ class LaneFinder:
         # Calculate curve radius
         curverad = ((1 + (2 * fit_cr[0] * np.max(ploty) * yscale + fit_cr[1]) ** 2) ** 1.5) / np.absolute(2 * fit_cr[0])
         return curverad
+    
+    def get_lane(self):
+        return 0
+
+    def get_offset(self):
+        return 0
