@@ -15,10 +15,14 @@ The goals / steps of this project are the following:
 
 [image1]: ./output_images/undistorted_output.png "Undistorted"
 [image2]: ./output_images/warped.png "Undistorted and Warped"
-[image3]: ./output_images/threshold.png "Thresholds Applied"
 
-[image4]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image5]: ./examples/example_output.jpg "Output"
+[image3]: ./output_images/threshold.png "Thresholds Applied"
+[image4]: ./output_images/histogram.png "Histogram"
+[image5]: ./output_images/detected_lines.png "Detected Lines"
+
+[image6]: ./output_images/undistorted_test.png "Undistorted Test"
+
+[image7]: ./output_images/example_output.png "Output"
 [video1]: ./project_video.mp4 "Video"
 
 ###Camera Calibration
@@ -27,14 +31,17 @@ The code for this step is contained in the `calibrator.py` file and more specifi
 
 The output `objpoints`, `imgpoints` are then used to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function. The `transformer.py` file contains the `transformer` class that essentially takes as parameters in its constructor the distortion coefficients and calibration matrix and provides a number of transformation functions such as `undistort()`. 
 
-One more step of the calibration process as an one-off is the calculation of the perspective transform matrix and its inverse. This is computed in the `calibrator.py` class and the `calc_perspective()` function. Once these matrices are calculated they are also saved within the `model` folder.
+One more step of the calibration process as an one-off is the calculation of the perspective transform matrix and its inverse. This is computed in the `calibrator.py` class and the `calc_perspective()` function. Once these matrices are calculated they are also saved within the `model` folder. To demonstrate that the calibration took place is correct we plot below the result of the `undistort()` function.
+
+![alt text][image1]
 
 ###Pipeline (single images)
 
 ####1. Distortion Correction
-Using the `undistort` function mentioned earlier and the already saved matrices we can produce an undistorted image as can be seen below:
 
-![alt text][image1]
+Using the `undistort()` function mentioned earlier and the already saved matrices we can produce an undistorted image as can be seen below:
+
+![alt text][image6]
 
 ####2. Perspective Transform 
 
@@ -65,12 +72,20 @@ Below you can see an example of thresholds applied using one of the test images 
 
 ![alt text][image3]
 
+####4. Line Detection
 
-####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+The line detection function `find_peaks()` can be found in the LaneFinder class in `lanefinder.py`. The approach is to first take an image, split it horizontally and take the bottom half of that. Using a histogram to find the peaks where pixels have higher intensity we can detect the lines as can be seen below:
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+![alt text][image4]
+
+Then we define a number of sliding windows and loop through them in order to identify the borders of the windows, find the non-zero pixels and save those in a left and right list that we use at a later stage when we fit a polynomial function that results to this final image:
 
 ![alt text][image5]
+
+The function described can be found in `lanefinder.py` and `sliding_window()`.
+
+
+
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 

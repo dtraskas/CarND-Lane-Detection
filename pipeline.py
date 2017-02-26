@@ -91,8 +91,7 @@ if __name__ == '__main__':
         Minv = np.loadtxt("model/matrix_inv.dat")
 
         transformer = Transformer()
-        transformer.initialise(mtx, dist, M, Minv)
-        
+        transformer.initialise(mtx, dist, M, Minv)        
         lanefinder = LaneFinder()
         
         undistorted = transformer.undistort(image)

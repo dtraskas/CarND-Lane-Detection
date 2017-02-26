@@ -41,7 +41,6 @@ def helper_one():
     plt.show()
     fig.savefig("output_images/undistorted_output.png")
 
-# Save the warped image for reporting purposes
 def helper_two():
     mtx = np.loadtxt("model/mtx.dat")
     dist = np.loadtxt("model/dist.dat")
@@ -82,7 +81,6 @@ def helper_two():
     plt.show()    
     fig.savefig("output_images/warped.png")
 
-# Save the warped image for reporting purposes
 def helper_three():
     mtx = np.loadtxt("model/mtx.dat")
     dist = np.loadtxt("model/dist.dat")
@@ -140,6 +138,75 @@ def helper_three():
     plt.show()
     fig.savefig("output_images/threshold.png")
 
+def helper_four():
+    mtx = np.loadtxt("model/mtx.dat")
+    dist = np.loadtxt("model/dist.dat")
+    M = np.loadtxt("model/matrix.dat")
+    Minv = np.loadtxt("model/matrix_inv.dat")
+
+    transformer = Transformer()
+    transformer.initialise(mtx, dist, M, Minv)
+    image = mpimg.imread('test_images/straight_lines2.jpg')
+    undistorted = transformer.undistort(image)
+    warped = transformer.warp(undistorted)
+    masked = transformer.color_grad_threshold(warped, sobel_kernel=3, thresh_x=(20, 100),thresh_c=(170, 255))
+
+    histogram = np.sum(masked[np.int(masked.shape[0]/2):,:], axis=0)
+
+    # plot histogram
+    fig = plt.figure(1, figsize=(9,4))    
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.imshow(warped, cmap='gray')
+    ax1.set_xlim(0, warped.shape[1])
+    ax1.set_ylim(warped.shape[0],0)
+    ax1.set_title("Warped Image")  
+    
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.plot(histogram)    
+    ax2.set_ylabel("Counts")
+    ax2.set_xlabel("Pixel Position")
+    ax2.set_aspect('equal')
+    ax2.set_title("Histogram")  
+
+    plt.xlim(0,len(histogram))
+    plt.ylim(0, warped.shape[0])    
+    plt.show()
+    fig.savefig("output_images/histogram.png")
+
+def helper_five():
+    mtx = np.loadtxt("model/mtx.dat")
+    dist = np.loadtxt("model/dist.dat")
+    M = np.loadtxt("model/matrix.dat")
+    Minv = np.loadtxt("model/matrix_inv.dat")
+
+    transformer = Transformer()
+    transformer.initialise(mtx, dist, M, Minv)
+    lanefinder = LaneFinder()
+    image = mpimg.imread('test_images/straight_lines2.jpg')
+    undistorted = transformer.undistort(image)
+    warped = transformer.warp(undistorted)
+    masked = transformer.color_grad_threshold(warped, sobel_kernel=3, thresh_x=(20, 100),thresh_c=(170, 255))
+    left, right = lanefinder.find_peaks(masked)
+    out_img, left_fitx, right_fitx, ploty = lanefinder.sliding_window(masked, left, right)
+    
+    fig = plt.figure(1, figsize=(9,4))    
+    
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.imshow(warped, cmap='gray')
+    ax1.set_xlim(0, warped.shape[1])
+    ax1.set_ylim(warped.shape[0],0)
+    ax1.set_title("Thresholded Image")  
+    
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.imshow(out_img, cmap='gray')
+    ax2.plot(left_fitx, ploty, color='yellow')
+    ax2.plot(right_fitx, ploty, color='yellow')
+    ax2.set_xlim(0, out_img.shape[1])
+    ax2.set_ylim(out_img.shape[0],0)
+    ax2.set_title("Detected Lines")  
+    plt.show()    
+    fig.savefig("output_images/detected_lines.png")
+
 if __name__ == '__main__':
 
-    helper_three()
+    helper_five()
