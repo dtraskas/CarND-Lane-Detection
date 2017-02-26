@@ -1,4 +1,4 @@
-**Advanced Lane Finding Project**
+# Advanced Lane Finding
 
 The goals / steps of this project are the following:
 
@@ -84,14 +84,13 @@ Then we define a number of sliding windows and loop through them in order to ide
 
 The function described can be found in `lanefinder.py` and `sliding_window()`.
 
+####5. Line Curvature
 
+In the `lanefinder.py` function and the `get_curvature()` function I calculate the curvature using the formula:
 
+R_curve = (1 + (2Ay+B)<sup>2</sup>)<sup>3/2</sup> / |2A|
 
-####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
-
-I did this in lines # through # in my code in `my_other_file.py`
-
-####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+####6. Final Result
 
 I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
 

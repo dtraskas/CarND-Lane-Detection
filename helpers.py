@@ -33,13 +33,13 @@ def helper_one():
     ax2 = fig.add_subplot(122)
     ax2.set_title('Undistorted')
     
-    example_img = mpimg.imread('camera_cal/calibration1.jpg')
+    example_img = mpimg.imread('test_images/test5.jpg')
     undst_example_img = transformer.undistort(example_img)
     ax1.imshow(example_img, cmap='gray')
     ax2.imshow(undst_example_img, cmap='gray')
     plt.tight_layout()
     plt.show()
-    fig.savefig("output_images/undistorted_output.png")
+    fig.savefig("output_images/undistorted_test.png")
 
 def helper_two():
     mtx = np.loadtxt("model/mtx.dat")
@@ -195,7 +195,7 @@ def helper_five():
     ax1.imshow(warped, cmap='gray')
     ax1.set_xlim(0, warped.shape[1])
     ax1.set_ylim(warped.shape[0],0)
-    ax1.set_title("Thresholded Image")  
+    ax1.set_title("Warped Image")  
     
     ax2 = fig.add_subplot(1,2,2)
     ax2.imshow(out_img, cmap='gray')
@@ -209,4 +209,4 @@ def helper_five():
 
 if __name__ == '__main__':
 
-    helper_five()
+    helper_six()
