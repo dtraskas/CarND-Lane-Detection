@@ -64,7 +64,7 @@ class CameraCalibrator:
     def calc_perspective(self, image, mtx, dist, offset, src_points):
         
         undist = cv2.undistort(image, mtx, dist, None, mtx)
-        # Grab the image shape
+        
         img_size = (undist.shape[1], undist.shape[0])                
         dst_points = np.float32([[offset, offset], 
                                  [img_size[0] - offset, offset], 
@@ -74,6 +74,6 @@ class CameraCalibrator:
         # Given src and dst points, calculate the perspective transform matrix
         M = cv2.getPerspectiveTransform(src_points, dst_points)
         np.savetxt("model/matrix.dat", M)
-
+        # Given dst and src points, calculate the inverse perspective transform matrix
         Minv = cv2.getPerspectiveTransform(dst_points, src_points)
         np.savetxt("model/matrix_inv.dat", Minv)

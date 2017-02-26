@@ -14,60 +14,53 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./output_images/undistorted_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
+[image2]: ./output_images/warped.jpg "Undistorted and Warped"
+
+
+[image3]: ./examples/warped_straight_lines.jpg "Warp Example"
+[image4]: ./examples/color_fit_lines.jpg "Fit Visual"
+[image5]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
 ###Camera Calibration
 
-The code for this step is contained in the `calibrator.py` file and more specifically the calibrate function. The calculated calibration matrix and distortion coefficients are saved during a one off calibration processing step in the `/model` folder. Calibration takes place by utilising all the chessboard images within the `/camera_cal` folder. The images are loaded and a list of coordinates of the chessoard corners is prepared. The assumption made here is that the chessboard is fixed on the (x, y) plane at z=0. The `objp` list is an array of coordinates that gets appended to `objpoints` every time a successful detection of all the chessboard corners in a test image is made. Just to note here that the chessboard corners for this calibration are of size (9,6). 
+The code for this step is contained in the `calibrator.py` file and more specifically the calibrate function. The calculated calibration matrix and distortion coefficients are saved during a one-off calibration processing step in the `/model` folder. Calibration takes place by utilising all the chessboard images within the `/camera_cal` folder. The images are loaded and a list of coordinates of the chessoard corners is prepared. The assumption made here is that the chessboard is fixed on the (x, y) plane at z=0. The `objp` list is an array of coordinates that gets appended to `objpoints` every time a successful detection of all the chessboard corners in a test image is made. Just to note here that the chessboard corners for this calibration are of size (9,6). 
 
-The output `objpoints`, `imgpoints` are then used to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function. The `transformer.py` file contains the `transformer` class that essentially takes as parameters in its constructor the distortion coefficients and calibration matrix and provides a number of transformation functions such as `undistort`. Using the latter function and the already saved matrices I can produce an undistorted image as can be seen below:
+The output `objpoints`, `imgpoints` are then used to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function. The `transformer.py` file contains the `transformer` class that essentially takes as parameters in its constructor the distortion coefficients and calibration matrix and provides a number of transformation functions such as `undistort()`. 
 
-![alt text][image1]
+One more step of the calibration process as an one-off is the calculation of the perspective transform matrix and its inverse. This is computed in the `calibrator.py` class and the `calc_perspective()` function. Once these matrices are calculated they are also saved within the `model` folder.
 
 ###Pipeline (single images)
 
-####1. Provide an example of a distortion-corrected image.
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
+####1. Distortion Correction
+Using the `undistort` function mentioned earlier and the already saved matrices we can produce an undistorted image as can be seen below:
+
+![alt text][image1]
+
+####2. Perspective Transform 
+
+The code for perspective transform resides within the `transformer.py` class and includes a function called `warp()`. The `warp()` function takes as inputs an image (`image`) and utilises the already calculated perspective transform matrix. This matrix and its inverse are loaded during initialisation time in the constructor. The inverse matrix is used to unwarp images as will be seen at a later stage of the pipeline.
+
+In order to calculate the perspective transform matrix I chose the source and destination points by looking at one of the test images. The code for this calculation resides within the `pipeline.py` module and is within the calibration phase. As you can also see I have chosen an offset of `300` and the following source points and destination points:
+
+| Source        | Destination   | 
+|:-------------:|:-------------:| 
+| 560, 470      | 300, 300      | 
+| 720, 470      | 980, 300      |
+| 1100, 720     | 980, 720      |
+| 200, 720      | 300, 720      |
+
+I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+
 ![alt text][image2]
+
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
 
 ![alt text][image3]
 
-####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
 
-```
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-
-```
-This resulted in the following source and destination points:
-
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
-
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-
-![alt text][image4]
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
