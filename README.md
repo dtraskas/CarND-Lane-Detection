@@ -14,7 +14,7 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./output_images/undistorted_output.png "Undistorted"
-[image2]: ./output_images/warped.jpg "Undistorted and Warped"
+[image2]: ./output_images/warped.png "Undistorted and Warped"
 
 
 [image3]: ./examples/warped_straight_lines.jpg "Warp Example"
