@@ -138,7 +138,7 @@ class LaneFinder:
 
         return left_curverad, right_curverad
 
-    # Returns offsets from the lanes for the car
+    # Returns offset from the lanes for the car
     def get_offset(self, masked, left_fit, right_fit):
         
         xm_per_pix = 3.7 / 700 # meters per pixel in x dimension
