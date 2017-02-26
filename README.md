@@ -15,9 +15,8 @@ The goals / steps of this project are the following:
 
 [image1]: ./output_images/undistorted_output.png "Undistorted"
 [image2]: ./output_images/warped.png "Undistorted and Warped"
+[image3]: ./output_images/threshold.png "Thresholds Applied"
 
-
-[image3]: ./examples/warped_straight_lines.jpg "Warp Example"
 [image4]: ./examples/color_fit_lines.jpg "Fit Visual"
 [image5]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
@@ -54,12 +53,17 @@ I verified that my perspective transform was working as expected by drawing the 
 
 ![alt text][image2]
 
-####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+####3. Thresholds
+
+The color and gradient thresholds were applied on the test images to generate a binary image. For the color threshold the saturation channel is first separated from the RGB image and subsequently thresholded using a tuple of values. For the gradient threshold the image is converted to grayscale, the x gradient is then calculated using the cv2.Sobel(), the absolute values are subsequently scaled and thresholds applied using a tuple of values. Once the two thresholds are calculated they are combined as can be seen here: 
+
+`combined[(s_binary == 1) | (grad_binary == 1)] = 1`
+
+The function that combines the two thresholds can be found in the `transformer.py` and it's `color_grad_threshold()`.
+
+Below you can see an example of thresholds applied using one of the test images provided:
 
 ![alt text][image3]
-
-
 
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?

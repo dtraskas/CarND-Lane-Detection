@@ -17,15 +17,20 @@ class Transformer:
         self.M = M
         self.Minv = Minv
     
+    # Returns the inverse perspective transform matrix
     def get_minv(self):
         return self.Minv
 
+    # Returns an undistorted image using the calibration matrix and coefficients calculated 
+    # during an earlier calibration stage
     def undistort(self, image):
         return cv2.undistort(image, self.mtx, self.dist, None, self.mtx)
 
+    # Return a warped image by applying the perspective transform matrix to the specified image
     def warp(self, image):        
         return cv2.warpPerspective(image, self.M, (image.shape[1], image.shape[0]))
     
+    # Return an unwarped image by applying the inverse perspective transform matrix to the specified image
     def unwarp(self, image):        
         return cv2.warpPerspective(image, self.Minv, (image.shape[1], image.shape[0]))
 
@@ -80,7 +85,8 @@ class Transformer:
         grad_binary[(scaled_sobel >= thresh[0]) & (scaled_sobel <= thresh[1])] = 1
 
         return grad_binary
-
+    
+    # Applies the gradient and color thresholds on the saturation channel
     def color_hls_threshold(self, image, sobel_kernel=3, thresh_x=(0, 150), thresh_c=(0, 150)):
 
         # Convert to HSV color space and separate the V channel
@@ -104,36 +110,39 @@ class Transformer:
         s_binary = np.zeros_like(s_channel)
         s_binary[(s_channel >= thresh_c[0]) & (s_channel <= thresh_c[1])] = 1
         
-        # Note color_binary[:, :, 0] is all 0s, effectively an all black image. It might
-        # be beneficial to replace this channel with something else.
+        #
+        # Combine thresholds
+        #
         color_binary = np.dstack((np.zeros_like(sxbinary), sxbinary, s_binary))
         return color_binary
-
+    
+    # Applies a gradient and color threshold to the specified image
     def color_grad_threshold(self, image, sobel_kernel=3, thresh_x=(0, 150), thresh_c=(0, 150)):
         
+        #
+        # Threshold x gradient on an RGB image converted to gray
+        #
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0)         
         # Absolute x derivative to accentuate lines away from horizontal
         abs_sobelx = np.absolute(sobelx) 
         scaled_sobel = np.uint8(255 * abs_sobelx / np.max(abs_sobelx))
-        
-        # Threshold x gradient
-        sobel_bin = np.zeros_like(scaled_sobel)
-        sobel_bin[(scaled_sobel >= thresh_x[0]) & (scaled_sobel <= thresh_x[1])] = 1
-        #sobel_bin = self.mag_thresh(image, sobel_kernel, thresh_x)
-        #sobel_bin = self.abs_sobel_thresh(image, 'x', sobel_kernel, thresh_x)
+        grad_binary = np.zeros_like(scaled_sobel)
+        grad_binary[(scaled_sobel >= thresh_x[0]) & (scaled_sobel <= thresh_x[1])] = 1
         
         #
-        # Threshold color channel
+        # Threshold color channel on the saturation channel
         #
         hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HLS).astype(np.float)
         l_channel = hsv[:,:,1]
         s_channel = hsv[:,:,2]
-
         s_binary = np.zeros_like(s_channel)
         s_binary[(s_channel >= thresh_c[0]) & (s_channel <= thresh_c[1])] = 1
         
-        mix_bin = np.zeros_like(s_binary)
-        mix_bin[(s_binary == 1) | (sobel_bin == 1)] = 1
+        #
+        # Combine thresholds
+        #
+        combined = np.zeros_like(s_binary)
+        combined[(s_binary == 1) | (grad_binary == 1)] = 1
 
-        return mix_bin
+        return combined
