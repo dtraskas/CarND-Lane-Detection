@@ -111,9 +111,7 @@ Here's a [link to my video result](./project_output.mp4). The video was generate
 
 ###Discussion
 
-I spent a lot of my time in this project finetuning the parameters of the threshold functions in order to mask the line pixels. Shadows, changes in lighting and other objects on the road seem to heavily affect the thresholding process. In the image below you can see a problem when the tarmac color changes for example:
-
-![alt text][image8]
+I spent a lot of my time in this project finetuning the parameters of the threshold functions in order to mask the line pixels. Shadows, changes in lighting and other objects on the road seem to heavily affect the thresholding process.
 
 It would be useful for a future extension of this work to detect areas of pixels that get discarded. This would require to split the image in areas where I use different thresholding techniques and masking. Additionally object detection using a separate algorithm could exclude areas of the image that are not relevant but affect the lane detection.
 
