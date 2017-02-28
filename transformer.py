@@ -138,11 +138,10 @@ class Transformer:
         s_channel = hsv[:,:,2]
         s_binary = np.zeros_like(s_channel)
         s_binary[(s_channel >= thresh_c[0]) & (s_channel <= thresh_c[1])] = 1
-        
+
         #
         # Combine thresholds
         #
         combined = np.zeros_like(s_binary)
         combined[(s_binary == 1) | (grad_binary == 1)] = 1
-
         return combined

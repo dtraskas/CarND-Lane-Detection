@@ -23,7 +23,7 @@ class LaneFinder:
         return leftx_base, rightx_base
 
     # Returns the left and right lanes detected from the specified image
-    def sliding_window(self, warped, leftx_base, rightx_base, nwindows=10):
+    def sliding_window(self, warped, leftx_base, rightx_base, nwindows=20):
         
         # Set height of windows
         window_height = np.int(warped.shape[0]/nwindows)
@@ -78,8 +78,32 @@ class LaneFinder:
         left_fit = np.polyfit(lefty, leftx, 2)
         right_fit = np.polyfit(righty, rightx, 2)
 
-        return left_fit, right_fit
+        return left_fit, right_fit, leftx, lefty, rightx, righty
     
+    # Returns the lane curvature
+    def get_curvature(self, image, left_fit, right_fit):
+        
+        # Define conversions in x and y from pixels space to meters        
+        ym_per_pix = 30 / 720 # meters per pixel in y dimension
+        xm_per_pix = 3.7 / 700 # meters per pixel in x dimension
+
+        ploty = np.linspace(0, image.shape[0]-1, image.shape[0])
+        leftx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+        rightx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+        # Fit new polynomials to x,y in world space
+        left_fit_cr = np.polyfit(ploty*ym_per_pix, leftx*xm_per_pix, 2)
+        right_fit_cr = np.polyfit(ploty*ym_per_pix, rightx*xm_per_pix, 2)
+
+        # Calculate the new radii of curvature
+        y_eval = np.max(ploty)
+        left_radius = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+        right_radius = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+
+        offset = ( image.shape[1]/2 - (leftx[-1]+rightx[-1])/2)*xm_per_pix
+
+        return left_radius, right_radius, offset
+
     # Returns the detected lane using the original undistorted image,
     # thresholded image and detected left and right lanes
     def get_lane(self, undistorted, masked, left_fit, right_fit):
@@ -102,50 +126,20 @@ class LaneFinder:
         
         # Combine the result with the original image
         final_image = cv2.addWeighted(undistorted, 1, newwarp, 0.3, 0)        
-
-        lcurve, rcurve = self.get_curvature(masked, left_fit, right_fit)        
-        avg_radius = np.mean([lcurve, rcurve])    
-        offset = self.get_offset(masked, left_fit, right_fit)
-        
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        text = "Curvature Radius: {:.0f} m".format(avg_radius)
-        cv2.putText(final_image, text, (20,50), font, 1, (255,255,255), 2)
-
-        text = "Centre Offset: {:.2f} m".format(offset)
-        cv2.putText(final_image, text, (20,80), font, 1, (255,255,255), 2)
-
         return final_image
 
-    # Returns the lane curvature
-    def get_curvature(self, masked, left_fit, right_fit):
+    # Adds the stats to the final image
+    def add_stats(self, image, left_r, right_r, offset):
         
-        ploty = np.linspace(0, masked.shape[0]-1, masked.shape[0])
-        leftx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
-        rightx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
-        # Define conversions in x and y from pixels space to meters        
-        ym_per_pix = 30 / 720 # meters per pixel in y dimension
-        xm_per_pix = 3.7 / 700 # meters per pixel in x dimension
-
-        # Fit new polynomials to x,y in world space
-        left_fit_cr = np.polyfit(ploty*ym_per_pix, leftx*xm_per_pix, 2)
-        right_fit_cr = np.polyfit(ploty*ym_per_pix, rightx*xm_per_pix, 2)
-
-        # Calculate the new radii of curvature
-        y_eval = np.max(ploty)
-        left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
-        right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
-
-        return left_curverad, right_curverad
-
-    # Returns offset from the lanes for the car
-    def get_offset(self, masked, left_fit, right_fit):
+        font = cv2.FONT_HERSHEY_SIMPLEX
         
-        xm_per_pix = 3.7 / 700 # meters per pixel in x dimension
-        
-        ploty = np.linspace(0, masked.shape[0]-1, masked.shape[0])
-        leftx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
-        rightx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]        
-        offset = (((leftx[0] + rightx[0]) / 2) - (masked.shape[1] / 2)) * xm_per_pix
-        
-        return offset
+        text = "Left Radius: {:.0f} m".format(left_r)
+        cv2.putText(image, text, (20,50), font, 1, (255,255,255), 2)
+
+        text = "Right Radius: {:.0f} m".format(right_r)
+        cv2.putText(image, text, (20,80), font, 1, (255,255,255), 2)
+
+        text = "Centre Offset: {:.2f} m".format(offset)
+        cv2.putText(image, text, (20,110), font, 1, (255,255,255), 2)
+
+        return image

@@ -25,11 +25,13 @@ def process_image(image):
     undistorted = globalTransformer.undistort(image)
     warped = globalTransformer.warp(undistorted)
 
-    masked = globalTransformer.color_grad_threshold(warped, sobel_kernel=3, thresh_x=(20, 100),thresh_c=(170, 255))
+    masked = globalTransformer.color_grad_threshold(warped, sobel_kernel=9, thresh_x=(20, 100),thresh_c=(60, 255))
     left, right = globalLaneFinder.find_peaks(masked)
-    left_fit, right_fit = globalLaneFinder.sliding_window(masked, left, right)
+    left_fit, right_fit, leftx, lefty, rightx, righty = globalLaneFinder.sliding_window(masked, left, right)
     final_result = globalLaneFinder.get_lane(undistorted, masked, left_fit, right_fit)
-    
+    left_r, right_r, offset = globalLaneFinder.get_curvature(masked, left_fit, right_fit)    
+    final_result = globalLaneFinder.add_stats(final_result, left_r, right_r, offset)
+
     return final_result    
 
 # Process the entire video
