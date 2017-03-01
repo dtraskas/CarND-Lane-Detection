@@ -208,7 +208,7 @@ def helper_five():
     fig.savefig("output_images/detected_lines.png")
 
 def helper_six():
-    image = mpimg.imread('images/test.jpg')
+    image = mpimg.imread('images/test7.jpg')
 
     mtx = np.loadtxt("model/mtx.dat")
     dist = np.loadtxt("model/dist.dat")
@@ -223,9 +223,10 @@ def helper_six():
 
     undistorted = transformer.undistort(image)
     warped = transformer.warp(undistorted)    
-    masked = transformer.color_grad_threshold(warped, sobel_kernel=9, thresh_x=(20, 100),thresh_c=(60, 255))
+    masked = transformer.color_grad_threshold(warped, sobel_kernel=9, thresh_x=(20, 100),thresh_c=(120, 255))
     left, right = lanefinder.find_peaks(masked)
     left_fit, right_fit, leftx, lefty, rightx, righty = lanefinder.sliding_window(masked, left, right)
+    print(left_fit[1], right_fit[1])
     final_result = lanefinder.get_lane(undistorted, masked, left_fit, right_fit)    
     left_r, right_r, offset = lanefinder.get_curvature(masked, left_fit, right_fit)    
     final_result = lanefinder.add_stats(final_result, left_r, right_r, offset)

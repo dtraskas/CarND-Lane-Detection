@@ -86,33 +86,22 @@ class Transformer:
 
         return grad_binary
     
-    # Applies the gradient and color thresholds on the saturation channel
-    def color_hls_threshold(self, image, sobel_kernel=3, thresh_x=(0, 150), thresh_c=(0, 150)):
+    # Applies the gradient and color thresholds on the selected channel
+    def color_hls_threshold(self, image, hls=2, sobel_kernel=3, thresh_x=(0, 150), thresh_c=(0, 150)):
 
-        # Convert to HSV color space and separate the V channel
-        hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HLS).astype(np.float)
-        l_channel = hsv[:,:,1]
-        s_channel = hsv[:,:,2]
-        
-        # Take the derivative in x
-        sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0)         
+        channel = cv2.cvtColor(image, cv2.COLOR_RGB2HLS).astype(np.float)[:,:,hls]
+        sobelx = cv2.Sobel(channel, cv2.CV_64F, 1, 0)         
         # Absolute x derivative to accentuate lines away from horizontal
         abs_sobelx = np.absolute(sobelx) 
         scaled_sobel = np.uint8(255 * abs_sobelx / np.max(abs_sobelx))
-        
-        # Threshold x gradient
         sxbinary = np.zeros_like(scaled_sobel)
         sxbinary[(scaled_sobel >= thresh_x[0]) & (scaled_sobel <= thresh_x[1])] = 1
         
-        #
         # Threshold color channel
-        #
-        s_binary = np.zeros_like(s_channel)
-        s_binary[(s_channel >= thresh_c[0]) & (s_channel <= thresh_c[1])] = 1
-        
-        #
-        # Combine thresholds
-        #
+        s_binary = np.zeros_like(channel)
+        s_binary[(channel >= thresh_c[0]) & (channel <= thresh_c[1])] = 1
+                
+        # Combine thresholds        
         color_binary = np.dstack((np.zeros_like(sxbinary), sxbinary, s_binary))
         return color_binary
     
@@ -139,9 +128,21 @@ class Transformer:
         s_binary = np.zeros_like(s_channel)
         s_binary[(s_channel >= thresh_c[0]) & (s_channel <= thresh_c[1])] = 1
 
+        # magnitude
+        mag = self.mag_thresh(image, sobel_kernel, (30, 150))
+
+        # RGB colour        
+        R = image[:,:,2]
+        G = image[:,:,1]
+        B = image[:,:,0]
+
+        thresh = (170, 255)
+        binary = np.zeros_like(R)
+        binary[(R > thresh[0]) & (R <= thresh[1])] = 1
+                
         #
         # Combine thresholds
         #
         combined = np.zeros_like(s_binary)
-        combined[(s_binary == 1) | (grad_binary == 1)] = 1
+        combined[(s_binary == 1) | (grad_binary == 1) | (mag == 1) | (binary == 1)] = 1
         return combined

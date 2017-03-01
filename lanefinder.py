@@ -23,7 +23,7 @@ class LaneFinder:
         return leftx_base, rightx_base
 
     # Returns the left and right lanes detected from the specified image
-    def sliding_window(self, warped, leftx_base, rightx_base, nwindows=20):
+    def sliding_window(self, warped, leftx_base, rightx_base, nwindows=9):
         
         # Set height of windows
         window_height = np.int(warped.shape[0]/nwindows)
